@@ -1,0 +1,17 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "prConcurrentLimit": 15,
+  "postUpdateOptions": ["pnpmDedupe"],
+  "labels": ["Type:Dependencies"],
+  "packageRules": [
+    {
+      "updateTypes": ["major"],
+      "automerge": false
+    },
+    {
+      "updateTypes": ["minor", "patch"],
+      "enabled": false
+    }
+  ]
+}

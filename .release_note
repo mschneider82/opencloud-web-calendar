@@ -1,0 +1,5 @@
+skeleton-{{ .Version }}
+
+## How to use
+Download the attached release artifact "skeleton-{{ .Version }}.zip" and extract it. Then read in the README.md file
+for further instructions on how to develop your own OpenCloud web app from the provided app skeleton.

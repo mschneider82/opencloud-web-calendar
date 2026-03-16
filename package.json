@@ -1,0 +1,51 @@
+{
+  "name": "web-app-calendar",
+  "version": "1.0.0",
+  "description": "CalDAV Calendar App for OpenCloud",
+  "license": "Apache-2.0",
+  "author": "OpenCloud",
+  "private": true,
+  "homepage": "https://github.com/mschneider82/opencloud-web-calendar",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm vite build",
+    "build:w": "pnpm vite build --watch --mode development",
+    "check:types": "vue-tsc --noEmit",
+    "lint": "eslint 'src/**/*.{js,ts,vue}' --color",
+    "format:check": "prettier . --check",
+    "format:write": "prettier . --write",
+    "test:unit": "NODE_OPTIONS=--unhandled-rejections=throw vitest"
+  },
+  "devDependencies": {
+    "@opencloud-eu/eslint-config": "^5.0.0",
+    "@opencloud-eu/prettier-config": "^5.0.0",
+    "@opencloud-eu/tsconfig": "^5.0.0",
+    "@opencloud-eu/web-client": "^5.0.0",
+    "@opencloud-eu/web-pkg": "^5.0.0",
+    "@types/node": "^24.0.0",
+    "@vue/test-utils": "^2.4.6",
+    "eslint": "^9.22.0",
+    "happy-dom": "^20.0.0",
+    "prettier": "^3.5.3",
+    "tailwindcss": "^4.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2",
+    "vite": "^7.0.0",
+    "vitest": "^4.0.0",
+    "vue": "^3.5.13",
+    "vue-router": "^5.0.0",
+    "vue-tsc": "^3.0.0",
+    "vue3-gettext": "^2.4.0"
+  },
+  "dependencies": {
+    "@fullcalendar/core": "^6.1.20",
+    "@fullcalendar/daygrid": "^6.1.20",
+    "@fullcalendar/interaction": "^6.1.20",
+    "@fullcalendar/timegrid": "^6.1.20",
+    "@fullcalendar/vue3": "^6.1.20",
+    "@opencloud-eu/extension-sdk": "^5.0.0",
+    "fast-xml-parser": "^4.5.3",
+    "ical.js": "^2.2.1"
+  },
+  "packageManager": "pnpm@10.18.1"
+}
