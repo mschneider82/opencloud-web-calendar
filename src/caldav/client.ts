@@ -6,9 +6,15 @@ import {
   deleteEvent,
   fetchSingleEvent
 } from './events'
+import {
+  createCalendar as createCalendarRequest,
+  deleteCalendar as deleteCalendarRequest,
+  type CreateCalendarData
+} from './calendar-management'
 import type { Calendar, CalendarEvent, EventFormData, DateRange } from '../types/calendar'
 
 export { CalDAVError, AuthenticationError, NotFoundError, ConflictError, NetworkError } from './errors'
+export type { CreateCalendarData } from './calendar-management'
 
 export interface CalDAVClient {
   discoverCalendars(): Promise<Calendar[]>
@@ -19,6 +25,8 @@ export interface CalDAVClient {
   updateEvent(event: CalendarEvent, formData: EventFormData): Promise<CalendarEvent>
   deleteEvent(event: CalendarEvent): Promise<void>
   fetchSingleEvent(href: string): Promise<CalendarEvent | null>
+  createCalendar(calendarHomeUrl: string, data: CreateCalendarData): Promise<Calendar>
+  deleteCalendar(calendarHref: string): Promise<void>
 }
 
 export function createCalDAVClient(): CalDAVClient {
@@ -40,7 +48,9 @@ export function createCalDAVClient(): CalDAVClient {
     createEvent,
     updateEvent,
     deleteEvent,
-    fetchSingleEvent
+    fetchSingleEvent,
+    createCalendar: createCalendarRequest,
+    deleteCalendar: deleteCalendarRequest
   }
 }
 

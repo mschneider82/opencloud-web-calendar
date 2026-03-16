@@ -54,6 +54,32 @@ export function buildCalendarQuery(start: Date, end: Date): string {
 </c:calendar-query>`
 }
 
+export function buildMkCalendar(displayName: string, description?: string, color?: string): string {
+  const descriptionProp = description
+    ? `    <c:calendar-description>${escapeXml(description)}</c:calendar-description>\n`
+    : ''
+
+  const colorProp = color ? `    <ic:calendar-color>${escapeXml(color)}</ic:calendar-color>\n` : ''
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<d:mkcalendar xmlns:d="${DAV_NS}" xmlns:c="${CALDAV_NS}" xmlns:ic="${ICAL_NS}">
+  <d:set>
+    <d:prop>
+      <d:displayname>${escapeXml(displayName)}</d:displayname>
+${descriptionProp}${colorProp}    </d:prop>
+  </d:set>
+</d:mkcalendar>`
+}
+
+function escapeXml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;')
+}
+
 function formatDateTimeUTC(date: Date): string {
   return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
 }

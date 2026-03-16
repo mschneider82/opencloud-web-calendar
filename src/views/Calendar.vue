@@ -5,9 +5,12 @@ import CalendarToolbar from '../components/CalendarToolbar.vue'
 import CalendarSidebar from '../components/CalendarSidebar.vue'
 import CalendarView from '../components/CalendarView.vue'
 import EventDialog from '../components/EventDialog.vue'
+import CalendarDialog from '../components/CalendarDialog.vue'
+import ConfirmDialog from '../components/ConfirmDialog.vue'
 import { useCalendars } from '../composables/useCalendars'
 import { useEvents } from '../composables/useEvents'
 import { useEventEditor } from '../composables/useEventEditor'
+import { useCalendarEditor } from '../composables/useCalendarEditor'
 import { getExtendedRange } from '../utils/date'
 import { getCalDAVClient } from '../caldav/client'
 import { initAuthStore } from '../caldav/auth'
@@ -24,9 +27,11 @@ initAuthStore(authStore)
 const {
   calendars,
   loading: calendarsLoading,
+  calendarHomeUrl,
   loadCalendars,
   toggleCalendarVisibility,
-  getDefaultCalendar
+  getDefaultCalendar,
+  deleteCalendar
 } = useCalendars()
 
 const {
@@ -38,6 +43,14 @@ const {
 } = useEvents()
 
 const { openCreate, openEdit } = useEventEditor()
+const { open: openCalendarEditor } = useCalendarEditor()
+
+// Confirmation dialog state
+const confirmDelete = ref<{
+  isOpen: boolean
+  calendarHref: string
+  calendarName: string
+} | null>(null)
 
 const calendarViewRef = ref<InstanceType<typeof CalendarView> | null>(null)
 const currentDate = ref(new Date())
@@ -127,6 +140,40 @@ async function handleEventSaved() {
 async function handleEventDeleted() {
   await loadEventsForCurrentRange()
 }
+
+function handleCreateCalendar() {
+  openCalendarEditor()
+}
+
+function handleDeleteCalendar(calendarHref: string) {
+  const calendar = calendars.value.find((c) => c.href === calendarHref)
+  if (calendar) {
+    confirmDelete.value = {
+      isOpen: true,
+      calendarHref,
+      calendarName: calendar.displayName
+    }
+  }
+}
+
+async function confirmCalendarDeletion() {
+  if (!confirmDelete.value) return
+
+  const success = await deleteCalendar(confirmDelete.value.calendarHref)
+  if (success) {
+    // Reload events to remove events from deleted calendar
+    await loadEventsForCurrentRange()
+  }
+  confirmDelete.value = null
+}
+
+function cancelCalendarDeletion() {
+  confirmDelete.value = null
+}
+
+async function handleCalendarSaved() {
+  await loadCalendars()
+}
 </script>
 
 <template>
@@ -145,6 +192,8 @@ async function handleEventDeleted() {
         :calendars="calendars"
         :loading="calendarsLoading"
         @toggle="handleToggleCalendar"
+        @create="handleCreateCalendar"
+        @delete="handleDeleteCalendar"
       />
 
       <CalendarView
@@ -164,6 +213,18 @@ async function handleEventDeleted() {
       :calendars="calendars"
       @saved="handleEventSaved"
       @deleted="handleEventDeleted"
+    />
+
+    <CalendarDialog :calendar-home-url="calendarHomeUrl" @saved="handleCalendarSaved" />
+
+    <ConfirmDialog
+      :is-open="confirmDelete?.isOpen || false"
+      title="Delete Calendar"
+      :message="`Are you sure you want to delete '${confirmDelete?.calendarName}'? All events in this calendar will be permanently deleted.`"
+      confirm-text="Delete"
+      :confirm-danger="true"
+      @confirm="confirmCalendarDeletion"
+      @cancel="cancelCalendarDeletion"
     />
   </div>
 </template>

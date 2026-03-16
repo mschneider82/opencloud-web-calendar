@@ -8,14 +8,28 @@ defineProps<{
 
 const emit = defineEmits<{
   toggle: [calendarHref: string]
+  create: []
+  delete: [calendarHref: string]
 }>()
 </script>
 
 <template>
   <aside class="ext:w-64 ext:border-r ext:border-gray-200 ext:p-4 ext:bg-gray-50">
-    <h3 class="ext:text-sm ext:font-semibold ext:text-gray-600 ext:uppercase ext:tracking-wide ext:mb-3">
-      Calendars
-    </h3>
+    <div class="ext:flex ext:items-center ext:justify-between ext:mb-3">
+      <h3 class="ext:text-sm ext:font-semibold ext:text-gray-600 ext:uppercase ext:tracking-wide">
+        Calendars
+      </h3>
+      <button
+        type="button"
+        class="ext:p-1 ext:text-blue-600 hover:ext:bg-blue-50 ext:rounded"
+        title="Create new calendar"
+        @click="emit('create')"
+      >
+        <svg class="ext:w-5 ext:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+      </button>
+    </div>
 
     <div v-if="loading" class="ext:text-sm ext:text-gray-500">
       Loading calendars...
@@ -26,7 +40,11 @@ const emit = defineEmits<{
     </div>
 
     <ul v-else class="ext:space-y-2">
-      <li v-for="calendar in calendars" :key="calendar.href" class="ext:flex ext:items-center ext:gap-2">
+      <li
+        v-for="calendar in calendars"
+        :key="calendar.href"
+        class="ext:group ext:flex ext:items-center ext:gap-2"
+      >
         <input
           :id="`cal-${calendar.href}`"
           type="checkbox"
@@ -45,6 +63,21 @@ const emit = defineEmits<{
           />
           <span class="ext:truncate">{{ calendar.displayName }}</span>
         </label>
+        <button
+          type="button"
+          class="ext:p-1 ext:text-gray-400 hover:ext:text-red-600 ext:transition-colors ext:flex-shrink-0"
+          title="Delete calendar"
+          @click.stop="emit('delete', calendar.href)"
+        >
+          <svg class="ext:w-4 ext:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            />
+          </svg>
+        </button>
       </li>
     </ul>
   </aside>
