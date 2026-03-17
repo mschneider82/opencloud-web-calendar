@@ -8,16 +8,18 @@ import { urlJoin } from '@opencloud-eu/web-client'
 import '@opencloud-eu/extension-sdk/tailwind.css'
 import { RouteRecordRaw } from 'vue-router'
 import { computed } from 'vue'
-import { useGettext } from 'vue3-gettext'
+import { initLanguage, t } from './composables/useLanguage'
 
 export default defineWebApplication({
   setup(args) {
     console.log('[WebCalendar] App setup called')
-    const { $gettext } = useGettext()
+
+    // Initialize language early
+    initLanguage()
 
     const appInfo = {
       id: 'web-calendar',
-      name: $gettext('Web-Kalender'),
+      name: t('Web Calendar'),
       icon: 'calendar',
       color: '#3788d8'
     }
@@ -32,7 +34,7 @@ export default defineWebApplication({
         },
         meta: {
           authContext: 'user',
-          title: $gettext('Web-Kalender')
+          title: t('Web Calendar')
         }
       }
     ]

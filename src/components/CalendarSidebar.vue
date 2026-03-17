@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Calendar } from '../types/calendar'
+import { t } from '../composables/useLanguage'
 
 defineProps<{
   calendars: readonly Calendar[]
@@ -17,12 +18,12 @@ const emit = defineEmits<{
   <aside class="ext:w-64 ext:border-r ext:border-gray-200 ext:p-4 ext:bg-gray-50">
     <div class="ext:flex ext:items-center ext:justify-between ext:mb-3">
       <h3 class="ext:text-sm ext:font-semibold ext:text-gray-600 ext:uppercase ext:tracking-wide">
-        Calendars
+        {{ t('Calendars') }}
       </h3>
       <button
         type="button"
         class="ext:p-1 ext:text-blue-600 hover:ext:bg-blue-50 ext:rounded"
-        title="Create new calendar"
+        :title="t('Create new calendar')"
         @click="emit('create')"
       >
         <svg class="ext:w-5 ext:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,11 +33,11 @@ const emit = defineEmits<{
     </div>
 
     <div v-if="loading" class="ext:text-sm ext:text-gray-500">
-      Loading calendars...
+      {{ t('Loading calendars...') }}
     </div>
 
     <div v-else-if="calendars.length === 0" class="ext:text-sm ext:text-gray-500">
-      No calendars found
+      {{ t('No calendars found') }}
     </div>
 
     <ul v-else class="ext:space-y-2">
@@ -66,7 +67,7 @@ const emit = defineEmits<{
         <button
           type="button"
           class="ext:p-1 ext:text-gray-400 hover:ext:text-red-600 ext:transition-colors ext:flex-shrink-0"
-          title="Delete calendar"
+          :title="t('Delete calendar')"
           @click.stop="emit('delete', calendar.href)"
         >
           <svg class="ext:w-4 ext:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

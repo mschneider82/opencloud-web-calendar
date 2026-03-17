@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { t, getLanguage } from '../composables/useLanguage'
 
 const props = defineProps<{
   currentDate: Date
@@ -13,10 +14,12 @@ const emit = defineEmits<{
   'change-view': [view: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay']
 }>()
 
+const locale = computed(() => getLanguage())
+
 const title = computed(() => {
   const date = props.currentDate
   if (props.viewType === 'timeGridDay') {
-    return date.toLocaleDateString(undefined, {
+    return date.toLocaleDateString(locale.value, {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -24,12 +27,12 @@ const title = computed(() => {
     })
   }
   if (props.viewType === 'timeGridWeek') {
-    return date.toLocaleDateString(undefined, {
+    return date.toLocaleDateString(locale.value, {
       year: 'numeric',
       month: 'long'
     })
   }
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(locale.value, {
     year: 'numeric',
     month: 'long'
   })
@@ -44,7 +47,7 @@ const title = computed(() => {
         class="ext:px-3 ext:py-1.5 ext:text-sm ext:font-medium ext:text-gray-700 ext:rounded ext:border ext:border-gray-300 ext:bg-white hover:ext:bg-gray-50"
         @click="emit('today')"
       >
-        Today
+        {{ t('Today') }}
       </button>
       <button
         type="button"
@@ -76,7 +79,7 @@ const title = computed(() => {
         ]"
         @click="emit('change-view', 'dayGridMonth')"
       >
-        Month
+        {{ t('Month') }}
       </button>
       <button
         type="button"
@@ -86,7 +89,7 @@ const title = computed(() => {
         ]"
         @click="emit('change-view', 'timeGridWeek')"
       >
-        Week
+        {{ t('Week') }}
       </button>
       <button
         type="button"
@@ -96,7 +99,7 @@ const title = computed(() => {
         ]"
         @click="emit('change-view', 'timeGridDay')"
       >
-        Day
+        {{ t('Day') }}
       </button>
     </div>
   </div>

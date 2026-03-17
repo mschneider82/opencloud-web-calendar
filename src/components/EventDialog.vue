@@ -3,6 +3,7 @@ import { computed, watch } from 'vue'
 import { useEventEditor } from '../composables/useEventEditor'
 import type { Calendar } from '../types/calendar'
 import { formatDateForInput, formatTimeForInput } from '../utils/date'
+import { t } from '../composables/useLanguage'
 
 const props = defineProps<{
   calendars: readonly Calendar[]
@@ -105,7 +106,7 @@ function handleClose() {
         <!-- Header -->
         <div class="ext:flex ext:items-center ext:justify-between ext:px-6 ext:py-4 ext:border-b">
           <h2 class="ext:text-lg ext:font-semibold ext:text-gray-900">
-            {{ isEditing ? 'Edit Event' : 'New Event' }}
+            {{ isEditing ? t('Edit Event') : t('New Event') }}
           </h2>
           <button
             type="button"
@@ -121,7 +122,7 @@ function handleClose() {
         <!-- Conflict Warning -->
         <div v-if="conflictData" class="ext:px-6 ext:py-4 ext:bg-yellow-50 ext:border-b ext:border-yellow-200">
           <p class="ext:text-sm ext:text-yellow-800 ext:mb-3">
-            This event was modified by another client. Choose how to resolve:
+            {{ t('This event was modified by another client. Choose how to resolve:') }}
           </p>
           <div class="ext:flex ext:gap-2">
             <button
@@ -129,14 +130,14 @@ function handleClose() {
               class="ext:px-3 ext:py-1.5 ext:text-sm ext:bg-yellow-600 ext:text-white ext:rounded hover:ext:bg-yellow-700"
               @click="resolveConflictKeepLocal"
             >
-              Keep my changes
+              {{ t('Keep my changes') }}
             </button>
             <button
               type="button"
               class="ext:px-3 ext:py-1.5 ext:text-sm ext:bg-gray-200 ext:text-gray-700 ext:rounded hover:ext:bg-gray-300"
               @click="resolveConflictUseServer"
             >
-              Use server version
+              {{ t('Use server version') }}
             </button>
           </div>
         </div>
@@ -146,7 +147,7 @@ function handleClose() {
           <!-- Title -->
           <div>
             <label for="event-title" class="ext:block ext:text-sm ext:font-medium ext:text-gray-700 ext:mb-1">
-              Title
+              {{ t('Title') }}
             </label>
             <input
               id="event-title"
@@ -154,14 +155,14 @@ function handleClose() {
               type="text"
               required
               class="ext:w-full ext:px-3 ext:py-2 ext:text-gray-900 ext:border ext:border-gray-300 ext:rounded ext:focus:ring-2 ext:focus:ring-blue-500 ext:focus:border-blue-500"
-              placeholder="Event title"
+              :placeholder="t('Event title')"
             />
           </div>
 
           <!-- Calendar (only for new events) -->
           <div v-if="!isEditing">
             <label for="event-calendar" class="ext:block ext:text-sm ext:font-medium ext:text-gray-700 ext:mb-1">
-              Calendar
+              {{ t('Calendar') }}
             </label>
             <select
               id="event-calendar"
@@ -183,7 +184,7 @@ function handleClose() {
               class="ext:w-4 ext:h-4 ext:rounded ext:border-gray-300"
             />
             <label for="event-allday" class="ext:text-sm ext:font-medium ext:text-gray-900">
-              All day event
+              {{ t('All day event') }}
             </label>
           </div>
 
@@ -191,7 +192,7 @@ function handleClose() {
           <div class="ext:grid ext:grid-cols-2 ext:gap-4">
             <div>
               <label for="event-start-date" class="ext:block ext:text-sm ext:font-medium ext:text-gray-700 ext:mb-1">
-                Start Date
+                {{ t('Start Date') }}
               </label>
               <input
                 id="event-start-date"
@@ -203,7 +204,7 @@ function handleClose() {
             </div>
             <div v-if="!formData.allDay">
               <label for="event-start-time" class="ext:block ext:text-sm ext:font-medium ext:text-gray-700 ext:mb-1">
-                Start Time
+                {{ t('Start Time') }}
               </label>
               <input
                 id="event-start-time"
@@ -219,7 +220,7 @@ function handleClose() {
           <div class="ext:grid ext:grid-cols-2 ext:gap-4">
             <div>
               <label for="event-end-date" class="ext:block ext:text-sm ext:font-medium ext:text-gray-700 ext:mb-1">
-                End Date
+                {{ t('End Date') }}
               </label>
               <input
                 id="event-end-date"
@@ -231,7 +232,7 @@ function handleClose() {
             </div>
             <div v-if="!formData.allDay">
               <label for="event-end-time" class="ext:block ext:text-sm ext:font-medium ext:text-gray-700 ext:mb-1">
-                End Time
+                {{ t('End Time') }}
               </label>
               <input
                 id="event-end-time"
@@ -246,28 +247,28 @@ function handleClose() {
           <!-- Location -->
           <div>
             <label for="event-location" class="ext:block ext:text-sm ext:font-medium ext:text-gray-700 ext:mb-1">
-              Location
+              {{ t('Location') }}
             </label>
             <input
               id="event-location"
               v-model="formData.location"
               type="text"
               class="ext:w-full ext:px-3 ext:py-2 ext:border ext:border-gray-300 ext:rounded ext:focus:ring-2 ext:focus:ring-blue-500"
-              placeholder="Add location"
+              :placeholder="t('Add location')"
             />
           </div>
 
           <!-- Description -->
           <div>
             <label for="event-description" class="ext:block ext:text-sm ext:font-medium ext:text-gray-700 ext:mb-1">
-              Description
+              {{ t('Description') }}
             </label>
             <textarea
               id="event-description"
               v-model="formData.description"
               rows="3"
               class="ext:w-full ext:px-3 ext:py-2 ext:text-gray-900 ext:border ext:border-gray-300 ext:rounded ext:focus:ring-2 ext:focus:ring-blue-500"
-              placeholder="Add description"
+              :placeholder="t('Add description')"
             />
           </div>
 
@@ -287,7 +288,7 @@ function handleClose() {
               :disabled="saving"
               @click="handleDelete"
             >
-              Delete
+              {{ t('Delete') }}
             </button>
           </div>
           <div class="ext:flex ext:gap-3">
@@ -297,7 +298,7 @@ function handleClose() {
               :disabled="saving"
               @click="handleClose"
             >
-              Cancel
+              {{ t('Cancel') }}
             </button>
             <button
               type="button"
@@ -305,7 +306,7 @@ function handleClose() {
               :disabled="saving || !formData.summary"
               @click="handleSave"
             >
-              {{ saving ? 'Saving...' : 'Save' }}
+              {{ saving ? t('Saving...') : t('Save') }}
             </button>
           </div>
         </div>

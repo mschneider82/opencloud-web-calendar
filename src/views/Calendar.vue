@@ -14,6 +14,7 @@ import { useCalendarEditor } from '../composables/useCalendarEditor'
 import { getExtendedRange } from '../utils/date'
 import { getCalDAVClient } from '../caldav/client'
 import { initAuthStore } from '../caldav/auth'
+import { initLanguage, t } from '../composables/useLanguage'
 import type { CalendarEvent } from '../types/calendar'
 
 console.log('[WebCalendar] Calendar.vue script executing')
@@ -23,6 +24,9 @@ const authStore = useAuthStore()
 console.log('[WebCalendar] authStore obtained:', authStore)
 console.log('[WebCalendar] authStore.accessToken:', authStore.accessToken)
 initAuthStore(authStore)
+
+// Initialize language from user profile
+initLanguage()
 
 const {
   calendars,
@@ -219,9 +223,9 @@ async function handleCalendarSaved() {
 
     <ConfirmDialog
       :is-open="confirmDelete?.isOpen || false"
-      title="Delete Calendar"
-      :message="`Are you sure you want to delete '${confirmDelete?.calendarName}'? All events in this calendar will be permanently deleted.`"
-      confirm-text="Delete"
+      :title="t('Delete Calendar')"
+      :message="t(`Are you sure you want to delete '%{name}'? All events in this calendar will be permanently deleted.`, { name: confirmDelete?.calendarName || '' })"
+      :confirm-text="t('Delete')"
       :confirm-danger="true"
       @confirm="confirmCalendarDeletion"
       @cancel="cancelCalendarDeletion"
