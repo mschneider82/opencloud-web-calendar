@@ -4,7 +4,10 @@ import {
   createEvent,
   updateEvent,
   deleteEvent,
-  fetchSingleEvent
+  fetchSingleEvent,
+  updateEventOccurrence,
+  deleteEventOccurrence,
+  updateEventSeries
 } from './events'
 import {
   createCalendar as createCalendarRequest,
@@ -25,6 +28,9 @@ export interface CalDAVClient {
   updateEvent(event: CalendarEvent, formData: EventFormData): Promise<CalendarEvent>
   deleteEvent(event: CalendarEvent): Promise<void>
   fetchSingleEvent(href: string): Promise<CalendarEvent | null>
+  updateEventOccurrence(event: CalendarEvent, recurrenceId: string, formData: EventFormData): Promise<void>
+  deleteEventOccurrence(event: CalendarEvent, recurrenceId: string): Promise<void>
+  updateEventSeries(event: CalendarEvent, formData: EventFormData): Promise<void>
   createCalendar(calendarHomeUrl: string, data: CreateCalendarData): Promise<Calendar>
   deleteCalendar(calendarHref: string): Promise<void>
 }
@@ -49,6 +55,9 @@ export function createCalDAVClient(): CalDAVClient {
     updateEvent,
     deleteEvent,
     fetchSingleEvent,
+    updateEventOccurrence,
+    deleteEventOccurrence,
+    updateEventSeries,
     createCalendar: createCalendarRequest,
     deleteCalendar: deleteCalendarRequest
   }

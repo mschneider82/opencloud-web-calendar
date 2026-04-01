@@ -11,6 +11,7 @@ import { useCalendars } from '../composables/useCalendars'
 import { useEvents } from '../composables/useEvents'
 import { useEventEditor } from '../composables/useEventEditor'
 import { useCalendarEditor } from '../composables/useCalendarEditor'
+import { useTheme } from '../composables/useTheme'
 import { getExtendedRange } from '../utils/date'
 import { getCalDAVClient } from '../caldav/client'
 import { initAuthStore } from '../caldav/auth'
@@ -48,6 +49,7 @@ const {
 
 const { openCreate, openEdit } = useEventEditor()
 const { open: openCalendarEditor } = useCalendarEditor()
+const { isDark } = useTheme()
 
 // Confirmation dialog state
 const confirmDelete = ref<{
@@ -119,20 +121,34 @@ function handleDateSelect(start: Date, end: Date, allDay: boolean) {
 async function handleEventDrop(event: CalendarEvent, start: Date, end: Date) {
   const client = getCalDAVClient()
   try {
-    const updated = await client.updateEvent(event, {
-      uid: event.uid,
-      calendarHref: event.calendarHref,
-      summary: event.summary,
-      start,
-      end,
-      allDay: event.allDay,
-      description: event.description || '',
-      location: event.location || ''
-    })
-    updateEventInCache(updated)
+    if (event.isRecurring && event.recurrenceId) {
+      // Drag-drop a recurring instance: create exception for this occurrence
+      await client.updateEventOccurrence(event, event.recurrenceId, {
+        uid: event.uid,
+        calendarHref: event.calendarHref,
+        summary: event.summary,
+        start,
+        end,
+        allDay: event.allDay,
+        description: event.description || '',
+        location: event.location || ''
+      })
+      await loadEventsForCurrentRange()
+    } else {
+      const updated = await client.updateEvent(event, {
+        uid: event.uid,
+        calendarHref: event.calendarHref,
+        summary: event.summary,
+        start,
+        end,
+        allDay: event.allDay,
+        description: event.description || '',
+        location: event.location || ''
+      })
+      updateEventInCache(updated)
+    }
   } catch (err) {
     console.error('Failed to update event:', err)
-    // Refresh events to restore the original position
     await loadEventsForCurrentRange()
   }
 }
@@ -232,3 +248,175 @@ async function handleCalendarSaved() {
     />
   </div>
 </template>
+
+<style>
+/* ============================================================
+   Dark mode overrides
+   Uses OpenCloud's --oc-role-* CSS variables that are set on
+   document.documentElement and switch automatically with theme.
+   ============================================================ */
+
+/* --- Backgrounds --- */
+[data-calendar-theme="dark"] .ext\:bg-white {
+  background-color: var(--oc-role-surface) !important;
+}
+[data-calendar-theme="dark"] .ext\:bg-gray-50 {
+  background-color: var(--oc-role-surface-container) !important;
+}
+[data-calendar-theme="dark"] .ext\:bg-gray-100 {
+  background-color: var(--oc-role-surface-container-high) !important;
+}
+[data-calendar-theme="dark"] .ext\:bg-gray-200 {
+  background-color: var(--oc-role-surface-container-high) !important;
+}
+[data-calendar-theme="dark"] .hover\:ext\:bg-gray-50:hover {
+  background-color: var(--oc-role-surface-container-high) !important;
+}
+[data-calendar-theme="dark"] .hover\:ext\:bg-gray-100:hover {
+  background-color: var(--oc-role-surface-container-highest) !important;
+}
+[data-calendar-theme="dark"] .hover\:ext\:bg-gray-200:hover {
+  background-color: var(--oc-role-surface-container-highest) !important;
+}
+[data-calendar-theme="dark"] .hover\:ext\:bg-gray-300:hover {
+  background-color: var(--oc-role-surface-container-highest) !important;
+}
+
+/* --- Text colors --- */
+[data-calendar-theme="dark"] .ext\:text-gray-900 {
+  color: var(--oc-role-on-surface) !important;
+}
+[data-calendar-theme="dark"] .ext\:text-gray-700 {
+  color: var(--oc-role-on-surface-variant) !important;
+}
+[data-calendar-theme="dark"] .ext\:text-gray-600 {
+  color: var(--oc-role-outline) !important;
+}
+[data-calendar-theme="dark"] .ext\:text-gray-500 {
+  color: var(--oc-role-outline) !important;
+}
+[data-calendar-theme="dark"] .ext\:text-gray-400 {
+  color: var(--oc-role-outline) !important;
+}
+[data-calendar-theme="dark"] .hover\:ext\:text-gray-700:hover {
+  color: var(--oc-role-on-surface) !important;
+}
+
+/* --- Borders --- */
+[data-calendar-theme="dark"] .ext\:border-gray-200 {
+  border-color: var(--oc-role-outline-variant) !important;
+}
+[data-calendar-theme="dark"] .ext\:border-gray-300 {
+  border-color: var(--oc-role-outline-variant) !important;
+}
+[data-calendar-theme="dark"] .ext\:border-gray-900 {
+  border-color: var(--oc-role-on-surface) !important;
+}
+[data-calendar-theme="dark"] .ext\:border-b {
+  border-color: var(--oc-role-outline-variant);
+}
+[data-calendar-theme="dark"] .ext\:border-t {
+  border-color: var(--oc-role-outline-variant);
+}
+[data-calendar-theme="dark"] .ext\:border-r {
+  border-color: var(--oc-role-outline-variant);
+}
+
+/* --- Primary / Blue --- */
+[data-calendar-theme="dark"] .ext\:bg-blue-500 {
+  background-color: var(--oc-role-primary) !important;
+}
+[data-calendar-theme="dark"] .ext\:bg-blue-600 {
+  background-color: var(--oc-role-primary) !important;
+}
+[data-calendar-theme="dark"] .hover\:ext\:bg-blue-700:hover {
+  background-color: var(--oc-role-primary-container) !important;
+  color: var(--oc-role-on-primary-container) !important;
+}
+[data-calendar-theme="dark"] .ext\:text-blue-600 {
+  color: var(--oc-role-primary) !important;
+}
+[data-calendar-theme="dark"] .hover\:ext\:bg-blue-50:hover {
+  background-color: var(--oc-role-primary-container) !important;
+}
+[data-calendar-theme="dark"] .ext\:border-blue-200 {
+  border-color: var(--oc-role-primary-container) !important;
+}
+[data-calendar-theme="dark"] .ext\:border-blue-600 {
+  border-color: var(--oc-role-primary) !important;
+}
+[data-calendar-theme="dark"] .ext\:bg-blue-600.ext\:text-white {
+  background-color: var(--oc-role-primary) !important;
+  color: var(--oc-role-on-primary) !important;
+}
+
+/* --- Focus rings --- */
+[data-calendar-theme="dark"] .ext\:focus\:ring-blue-500:focus {
+  --tw-ring-color: var(--oc-role-primary) !important;
+}
+[data-calendar-theme="dark"] .ext\:focus\:border-blue-500:focus {
+  border-color: var(--oc-role-primary) !important;
+}
+
+/* --- Error / Red --- */
+[data-calendar-theme="dark"] .ext\:text-red-600 {
+  color: var(--oc-role-error) !important;
+}
+[data-calendar-theme="dark"] .hover\:ext\:text-red-600:hover {
+  color: var(--oc-role-error) !important;
+}
+[data-calendar-theme="dark"] .hover\:ext\:text-red-800:hover {
+  color: var(--oc-role-error) !important;
+}
+[data-calendar-theme="dark"] .ext\:bg-red-600 {
+  background-color: var(--oc-role-error-container) !important;
+  color: var(--oc-role-on-error-container) !important;
+}
+[data-calendar-theme="dark"] .hover\:ext\:bg-red-700:hover {
+  background-color: var(--oc-role-error) !important;
+}
+
+/* --- Warning / Yellow (conflict resolution) --- */
+[data-calendar-theme="dark"] .ext\:bg-yellow-50 {
+  background-color: var(--oc-role-surface-container-high) !important;
+}
+[data-calendar-theme="dark"] .ext\:border-yellow-200 {
+  border-color: var(--oc-role-outline-variant) !important;
+}
+[data-calendar-theme="dark"] .ext\:text-yellow-800 {
+  color: var(--oc-role-on-surface) !important;
+}
+[data-calendar-theme="dark"] .ext\:bg-yellow-600 {
+  background-color: var(--oc-role-primary) !important;
+}
+[data-calendar-theme="dark"] .hover\:ext\:bg-yellow-700:hover {
+  background-color: var(--oc-role-primary-container) !important;
+}
+
+/* --- Inputs (inside dark theme) --- */
+[data-calendar-theme="dark"] input,
+[data-calendar-theme="dark"] select,
+[data-calendar-theme="dark"] textarea {
+  background-color: var(--oc-role-surface-container-low) !important;
+  color: var(--oc-role-on-surface) !important;
+  border-color: var(--oc-role-outline-variant) !important;
+}
+[data-calendar-theme="dark"] input[type="checkbox"],
+[data-calendar-theme="dark"] input[type="radio"] {
+  background-color: var(--oc-role-surface-container-low) !important;
+  accent-color: var(--oc-role-primary) !important;
+}
+[data-calendar-theme="dark"] input::placeholder,
+[data-calendar-theme="dark"] textarea::placeholder {
+  color: var(--oc-role-outline) !important;
+}
+[data-calendar-theme="dark"] option {
+  background-color: var(--oc-role-surface-container) !important;
+  color: var(--oc-role-on-surface) !important;
+}
+
+/* --- Dialog shadows --- */
+[data-calendar-theme="dark"] .ext\:shadow-xl {
+  --tw-shadow-color: rgba(0, 0, 0, 0.5) !important;
+}
+</style>

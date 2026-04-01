@@ -1,6 +1,9 @@
 import { ref, readonly, computed } from 'vue'
 import { getCalDAVClient, ConflictError } from '../caldav/client'
-import type { CalendarEvent, EventFormData } from '../types/calendar'
+import { parseRRuleToFormData } from '../caldav/ics-utils'
+import type { CalendarEvent, EventFormData, RecurrenceFormData } from '../types/calendar'
+
+export type EditScope = 'single' | 'series'
 
 const isOpen = ref(false)
 const editingEvent = ref<CalendarEvent | null>(null)
@@ -8,6 +11,8 @@ const formData = ref<EventFormData>(createEmptyFormData(''))
 const saving = ref(false)
 const error = ref<Error | null>(null)
 const conflictData = ref<{ serverEvent: CalendarEvent; localData: EventFormData } | null>(null)
+const editScope = ref<EditScope | null>(null)
+const showScopeDialog = ref(false)
 
 function createEmptyFormData(calendarHref: string): EventFormData {
   const now = new Date()
@@ -36,6 +41,8 @@ export function useEventEditor() {
     editingEvent.value = null
     conflictData.value = null
     error.value = null
+    editScope.value = null
+    showScopeDialog.value = false
 
     const data = createEmptyFormData(calendarHref)
     if (startDate) {
@@ -53,6 +60,42 @@ export function useEventEditor() {
     conflictData.value = null
     error.value = null
 
+    // If recurring, show scope dialog first
+    if (event.isRecurring) {
+      showScopeDialog.value = true
+      editScope.value = null
+      return
+    }
+
+    editScope.value = null
+    showScopeDialog.value = false
+    populateFormFromEvent(event)
+    isOpen.value = true
+  }
+
+  function selectEditScope(scope: EditScope) {
+    editScope.value = scope
+    showScopeDialog.value = false
+
+    if (!editingEvent.value) return
+
+    populateFormFromEvent(editingEvent.value)
+
+    // For series edit, populate recurrence fields from RRULE
+    if (scope === 'series' && editingEvent.value.rrule) {
+      formData.value.recurrence = parseRRuleToFormData(editingEvent.value.rrule)
+    }
+
+    isOpen.value = true
+  }
+
+  function cancelScopeDialog() {
+    showScopeDialog.value = false
+    editingEvent.value = null
+    editScope.value = null
+  }
+
+  function populateFormFromEvent(event: CalendarEvent) {
     formData.value = {
       uid: event.uid,
       calendarHref: event.calendarHref,
@@ -63,7 +106,6 @@ export function useEventEditor() {
       description: event.description || '',
       location: event.location || ''
     }
-    isOpen.value = true
   }
 
   function close() {
@@ -71,6 +113,8 @@ export function useEventEditor() {
     editingEvent.value = null
     conflictData.value = null
     error.value = null
+    editScope.value = null
+    showScopeDialog.value = false
   }
 
   async function save(): Promise<CalendarEvent | null> {
@@ -81,7 +125,24 @@ export function useEventEditor() {
       let result: CalendarEvent
 
       if (editingEvent.value) {
-        result = await client.updateEvent(editingEvent.value, formData.value)
+        if (editingEvent.value.isRecurring && editScope.value === 'single') {
+          // Edit single occurrence: add exception via RECURRENCE-ID
+          await client.updateEventOccurrence(
+            editingEvent.value,
+            editingEvent.value.recurrenceId!,
+            formData.value
+          )
+          close()
+          return editingEvent.value
+        } else if (editingEvent.value.isRecurring && editScope.value === 'series') {
+          // Edit entire series
+          await client.updateEventSeries(editingEvent.value, formData.value)
+          close()
+          return editingEvent.value
+        } else {
+          // Non-recurring event: normal update
+          result = await client.updateEvent(editingEvent.value, formData.value)
+        }
       } else {
         result = await client.createEvent(formData.value)
       }
@@ -90,7 +151,6 @@ export function useEventEditor() {
       return result
     } catch (err) {
       if (err instanceof ConflictError && editingEvent.value) {
-        // Fetch the latest version from server
         const serverEvent = await client.fetchSingleEvent(editingEvent.value.href)
         if (serverEvent) {
           conflictData.value = {
@@ -113,7 +173,16 @@ export function useEventEditor() {
     error.value = null
 
     try {
-      await client.deleteEvent(editingEvent.value)
+      if (editingEvent.value.isRecurring && editScope.value === 'single') {
+        // Delete single occurrence
+        await client.deleteEventOccurrence(
+          editingEvent.value,
+          editingEvent.value.recurrenceId!
+        )
+      } else {
+        // Delete entire event/series
+        await client.deleteEvent(editingEvent.value)
+      }
       close()
       return true
     } catch (err) {
@@ -126,7 +195,6 @@ export function useEventEditor() {
 
   function resolveConflictKeepLocal(): void {
     if (conflictData.value) {
-      // Update the editing event with the server's etag so next save will work
       if (editingEvent.value) {
         editingEvent.value = {
           ...editingEvent.value,
@@ -163,8 +231,12 @@ export function useEventEditor() {
     saving: readonly(saving),
     error: readonly(error),
     conflictData: readonly(conflictData),
+    editScope: readonly(editScope),
+    showScopeDialog: readonly(showScopeDialog),
     openCreate,
     openEdit,
+    selectEditScope,
+    cancelScopeDialog,
     close,
     save,
     deleteEvent,

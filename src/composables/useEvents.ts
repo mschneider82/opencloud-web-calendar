@@ -41,11 +41,28 @@ export function useEvents() {
   }
 
   function updateEventInCache(updatedEvent: CalendarEvent): void {
-    events.value = events.value.map((e) => (e.uid === updatedEvent.uid ? updatedEvent : e))
+    if (updatedEvent.recurrenceId) {
+      // Update a specific occurrence
+      events.value = events.value.map((e) =>
+        e.uid === updatedEvent.uid && e.recurrenceId === updatedEvent.recurrenceId
+          ? updatedEvent
+          : e
+      )
+    } else {
+      events.value = events.value.map((e) => (e.uid === updatedEvent.uid ? updatedEvent : e))
+    }
   }
 
-  function removeEvent(uid: string): void {
-    events.value = events.value.filter((e) => e.uid !== uid)
+  function removeEvent(uid: string, recurrenceId?: string): void {
+    if (recurrenceId) {
+      // Remove a specific occurrence
+      events.value = events.value.filter(
+        (e) => !(e.uid === uid && e.recurrenceId === recurrenceId)
+      )
+    } else {
+      // Remove all instances of this UID
+      events.value = events.value.filter((e) => e.uid !== uid)
+    }
   }
 
   function findEventByUid(uid: string): CalendarEvent | undefined {

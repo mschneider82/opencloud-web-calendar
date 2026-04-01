@@ -19,6 +19,18 @@ export interface CalendarEvent {
   description?: string
   location?: string
   icsData: string
+  rrule?: string
+  recurrenceId?: string
+  isRecurring: boolean
+}
+
+export interface RecurrenceFormData {
+  frequency: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY'
+  interval: number
+  endType: 'never' | 'count' | 'until'
+  count?: number
+  until?: Date
+  byDay?: string[]
 }
 
 export interface EventFormData {
@@ -30,6 +42,7 @@ export interface EventFormData {
   allDay: boolean
   description: string
   location: string
+  recurrence?: RecurrenceFormData
 }
 
 export interface DateRange {

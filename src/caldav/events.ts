@@ -1,7 +1,7 @@
 import { CalDAVError, AuthenticationError, NotFoundError, ConflictError } from './errors'
 import { buildCalendarQuery } from './xml-builder'
 import { parseEvents } from './xml-parser'
-import { parseICS, generateICS, generateUID } from './ics-utils'
+import { parseICS, generateICS, generateUID, addExceptionToICS, updateSeriesICS } from './ics-utils'
 import { authenticatedFetch } from './auth'
 import type { CalendarEvent, EventFormData, DateRange } from '../types/calendar'
 
@@ -37,10 +37,8 @@ export async function fetchEvents(
 
   const events: CalendarEvent[] = []
   for (const data of eventData) {
-    const event = parseICS(data.calendarData, data.href, data.etag)
-    if (event) {
-      events.push(event)
-    }
+    const parsed = parseICS(data.calendarData, data.href, data.etag, range)
+    events.push(...parsed)
   }
 
   return events
@@ -83,7 +81,9 @@ export async function createEvent(formData: EventFormData): Promise<CalendarEven
     allDay: formData.allDay,
     description: formData.description || undefined,
     location: formData.location || undefined,
-    icsData
+    icsData,
+    isRecurring: !!formData.recurrence,
+    rrule: undefined
   }
 }
 
@@ -126,7 +126,8 @@ export async function updateEvent(
     description: formData.description || undefined,
     location: formData.location || undefined,
     etag,
-    icsData
+    icsData,
+    isRecurring: !!formData.recurrence || event.isRecurring
   }
 }
 
@@ -153,6 +154,73 @@ export async function deleteEvent(event: CalendarEvent): Promise<void> {
   }
 }
 
+export async function updateEventOccurrence(
+  event: CalendarEvent,
+  recurrenceId: string,
+  formData: EventFormData
+): Promise<void> {
+  const updatedICS = addExceptionToICS(event.icsData, recurrenceId, formData)
+
+  const response = await authenticatedFetch(event.href, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'text/calendar; charset=utf-8',
+      'If-Match': `"${event.etag}"`
+    },
+    body: updatedICS
+  })
+
+  if (response.status === 401) throw new AuthenticationError()
+  if (response.status === 412) throw new ConflictError('Event was modified by another client', event.etag)
+  if (!response.ok && response.status !== 204) {
+    throw new CalDAVError(`Failed to update occurrence: ${response.statusText}`, response.status)
+  }
+}
+
+export async function deleteEventOccurrence(
+  event: CalendarEvent,
+  recurrenceId: string
+): Promise<void> {
+  const updatedICS = addExceptionToICS(event.icsData, recurrenceId)
+
+  const response = await authenticatedFetch(event.href, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'text/calendar; charset=utf-8',
+      'If-Match': `"${event.etag}"`
+    },
+    body: updatedICS
+  })
+
+  if (response.status === 401) throw new AuthenticationError()
+  if (response.status === 412) throw new ConflictError('Event was modified by another client', event.etag)
+  if (!response.ok && response.status !== 204) {
+    throw new CalDAVError(`Failed to delete occurrence: ${response.statusText}`, response.status)
+  }
+}
+
+export async function updateEventSeries(
+  event: CalendarEvent,
+  formData: EventFormData
+): Promise<void> {
+  const updatedICS = updateSeriesICS(event.icsData, formData)
+
+  const response = await authenticatedFetch(event.href, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'text/calendar; charset=utf-8',
+      'If-Match': `"${event.etag}"`
+    },
+    body: updatedICS
+  })
+
+  if (response.status === 401) throw new AuthenticationError()
+  if (response.status === 412) throw new ConflictError('Event was modified by another client', event.etag)
+  if (!response.ok && response.status !== 204) {
+    throw new CalDAVError(`Failed to update series: ${response.statusText}`, response.status)
+  }
+}
+
 export async function fetchSingleEvent(href: string): Promise<CalendarEvent | null> {
   const response = await authenticatedFetch(href, {
     method: 'GET',
@@ -171,5 +239,6 @@ export async function fetchSingleEvent(href: string): Promise<CalendarEvent | nu
   const icsData = await response.text()
   const etag = response.headers.get('ETag')?.replace(/"/g, '') || ''
 
-  return parseICS(icsData, href, etag)
+  const events = parseICS(icsData, href, etag)
+  return events.length > 0 ? events[0] : null
 }

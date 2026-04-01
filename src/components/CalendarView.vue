@@ -37,7 +37,7 @@ const calendarColorMap = computed(() => {
 
 const fullCalendarEvents = computed<EventInput[]>(() => {
   return props.events.map((event) => ({
-    id: event.uid,
+    id: event.recurrenceId ? `${event.uid}_${event.recurrenceId}` : event.uid,
     title: event.summary,
     start: event.start,
     end: event.end,
@@ -162,33 +162,34 @@ defineExpose({
 <style>
 .fc {
   height: 100%;
-  background-color: #ffffff;
-  color: #1f2937;
+  background-color: var(--oc-role-surface, #ffffff);
+  color: var(--oc-role-on-surface, #1f2937);
 }
 
 .fc-theme-standard td,
 .fc-theme-standard th {
-  border-color: #e5e7eb;
+  border-color: var(--oc-role-outline-variant, #e5e7eb);
 }
 
 .fc-theme-standard .fc-scrollgrid {
-  border-color: #e5e7eb;
+  border-color: var(--oc-role-outline-variant, #e5e7eb);
 }
 
 .fc .fc-button-primary {
-  background-color: #3b82f6;
-  border-color: #3b82f6;
-  color: #ffffff;
+  background-color: var(--oc-role-primary, #3b82f6);
+  border-color: var(--oc-role-primary, #3b82f6);
+  color: var(--oc-role-on-primary, #ffffff);
 }
 
 .fc .fc-button-primary:hover {
-  background-color: #2563eb;
-  border-color: #2563eb;
+  background-color: var(--oc-role-primary-container, #2563eb);
+  border-color: var(--oc-role-primary-container, #2563eb);
+  color: var(--oc-role-on-primary-container, #ffffff);
 }
 
 .fc .fc-button-primary:disabled {
-  background-color: #93c5fd;
-  border-color: #93c5fd;
+  background-color: var(--oc-role-outline, #93c5fd);
+  border-color: var(--oc-role-outline, #93c5fd);
 }
 
 .fc-event {
@@ -197,32 +198,67 @@ defineExpose({
 
 .fc-daygrid-day-number {
   padding: 4px 8px;
-  color: #1f2937;
+  color: var(--oc-role-on-surface, #1f2937);
 }
 
 .fc-col-header-cell-cushion {
   padding: 8px;
-  color: #374151;
+  color: var(--oc-role-on-surface-variant, #374151);
 }
 
 .fc-daygrid-day {
-  background-color: #ffffff;
+  background-color: var(--oc-role-surface, #ffffff);
 }
 
 .fc-day-today {
-  background-color: #eff6ff !important;
+  background-color: var(--oc-role-primary-container, #eff6ff) !important;
 }
 
 .fc-daygrid-day-top {
-  color: #1f2937;
+  color: var(--oc-role-on-surface, #1f2937);
 }
 
 .fc-timegrid-slot-label {
-  color: #6b7280;
+  color: var(--oc-role-outline, #6b7280);
 }
 
 .fc-list-day-cushion {
-  background-color: #f3f4f6;
-  color: #1f2937;
+  background-color: var(--oc-role-surface-container, #f3f4f6);
+  color: var(--oc-role-on-surface, #1f2937);
+}
+
+/* Timegrid axis and slots */
+.fc .fc-timegrid-axis {
+  background-color: var(--oc-role-surface, #ffffff);
+}
+
+.fc .fc-timegrid-slot {
+  border-color: var(--oc-role-outline-variant, #e5e7eb);
+}
+
+/* Column header background */
+.fc .fc-col-header-cell {
+  background-color: var(--oc-role-surface-container, #f9fafb);
+}
+
+/* Day grid "more" link */
+.fc .fc-more-link {
+  color: var(--oc-role-primary, #3b82f6);
+}
+
+/* Now indicator */
+.fc .fc-timegrid-now-indicator-line {
+  border-color: var(--oc-role-error, #ef4444);
+}
+
+/* Popover ("+2 more" events popup) */
+.fc .fc-popover {
+  background-color: var(--oc-role-surface-container, #ffffff);
+  border-color: var(--oc-role-outline-variant, #e5e7eb);
+}
+
+.fc .fc-popover-header {
+  background-color: var(--oc-role-surface-container-high, #f3f4f6);
+  color: var(--oc-role-on-surface, #1f2937);
 }
 </style>
