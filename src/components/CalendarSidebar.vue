@@ -11,6 +11,7 @@ const emit = defineEmits<{
   toggle: [calendarHref: string]
   create: []
   delete: [calendarHref: string]
+  import: []
 }>()
 </script>
 
@@ -20,16 +21,28 @@ const emit = defineEmits<{
       <h3 class="ext:text-sm ext:font-semibold ext:text-gray-600 ext:uppercase ext:tracking-wide">
         {{ t('Calendars') }}
       </h3>
-      <button
-        type="button"
-        class="ext:p-1 ext:text-blue-600 hover:ext:bg-blue-50 ext:rounded"
-        :title="t('Create new calendar')"
-        @click="emit('create')"
-      >
-        <svg class="ext:w-5 ext:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-        </svg>
-      </button>
+      <div class="ext:flex ext:items-center ext:gap-1">
+        <button
+          type="button"
+          class="ext:p-1 ext:text-blue-600 hover:ext:bg-blue-50 ext:rounded"
+          :title="t('Import calendar')"
+          @click="emit('import')"
+        >
+          <svg class="ext:w-5 ext:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          class="ext:p-1 ext:text-blue-600 hover:ext:bg-blue-50 ext:rounded"
+          :title="t('Create new calendar')"
+          @click="emit('create')"
+        >
+          <svg class="ext:w-5 ext:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+        </button>
+      </div>
     </div>
 
     <div v-if="loading" class="ext:text-sm ext:text-gray-500">

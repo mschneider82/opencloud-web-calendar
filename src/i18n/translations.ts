@@ -82,6 +82,28 @@ export const translations = {
     On: 'On',
     'Delete this event': 'Delete this event',
 
+    // ICS Import
+    'Import Calendar': 'Import Calendar',
+    'Import calendar': 'Import calendar',
+    'ICS File': 'ICS File',
+    'Import mode': 'Import mode',
+    'Merge into current calendar': 'Merge into current calendar',
+    'Enter calendar name': 'Enter calendar name',
+    Import: 'Import',
+    Close: 'Close',
+    'Reading file...': 'Reading file...',
+    'Parsing events...': 'Parsing events...',
+    'Analyzing for duplicates...': 'Analyzing for duplicates...',
+    'Importing events...': 'Importing events...',
+    Created: 'Created',
+    Updated: 'Updated',
+    Skipped: 'Skipped',
+    Failed: 'Failed',
+    'Imported %{count} events into "%{name}"': 'Imported %{count} events into "%{name}"',
+    'Parse warnings': 'Parse warnings',
+    'Show details': 'Show details',
+    'Hide details': 'Hide details',
+
     // Confirm Dialog
     Confirm: 'Confirm',
 
@@ -169,6 +191,28 @@ export const translations = {
     occurrences: 'Wiederholungen',
     On: 'Am',
     'Delete this event': 'Diesen Termin löschen',
+
+    // ICS Import
+    'Import Calendar': 'Kalender importieren',
+    'Import calendar': 'Kalender importieren',
+    'ICS File': 'ICS-Datei',
+    'Import mode': 'Importmodus',
+    'Merge into current calendar': 'In aktuellen Kalender zusammenführen',
+    'Enter calendar name': 'Kalendername eingeben',
+    Import: 'Importieren',
+    Close: 'Schließen',
+    'Reading file...': 'Datei wird gelesen...',
+    'Parsing events...': 'Termine werden analysiert...',
+    'Analyzing for duplicates...': 'Duplikate werden geprüft...',
+    'Importing events...': 'Termine werden importiert...',
+    Created: 'Erstellt',
+    Updated: 'Aktualisiert',
+    Skipped: 'Übersprungen',
+    Failed: 'Fehlgeschlagen',
+    'Imported %{count} events into "%{name}"': '%{count} Termine in „%{name}" importiert',
+    'Parse warnings': 'Hinweise beim Einlesen',
+    'Show details': 'Details anzeigen',
+    'Hide details': 'Details ausblenden',
 
     // Confirm Dialog
     Confirm: 'Bestätigen',

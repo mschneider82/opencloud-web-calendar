@@ -7,6 +7,7 @@ import CalendarView from '../components/CalendarView.vue'
 import EventDialog from '../components/EventDialog.vue'
 import CalendarDialog from '../components/CalendarDialog.vue'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
+import ICSImportDialog from '../components/ICSImportDialog.vue'
 import { useCalendars } from '../composables/useCalendars'
 import { useEvents } from '../composables/useEvents'
 import { useEventEditor } from '../composables/useEventEditor'
@@ -49,6 +50,7 @@ const {
 
 const { openCreate, openEdit } = useEventEditor()
 const { open: openCalendarEditor } = useCalendarEditor()
+const importDialogRef = ref<InstanceType<typeof ICSImportDialog> | null>(null)
 const { isDark } = useTheme()
 
 // Confirmation dialog state
@@ -194,6 +196,15 @@ function cancelCalendarDeletion() {
 async function handleCalendarSaved() {
   await loadCalendars()
 }
+
+function handleImportCalendar() {
+  importDialogRef.value?.open()
+}
+
+async function handleImported() {
+  await loadCalendars()
+  await loadEventsForCurrentRange()
+}
 </script>
 
 <template>
@@ -214,6 +225,7 @@ async function handleCalendarSaved() {
         @toggle="handleToggleCalendar"
         @create="handleCreateCalendar"
         @delete="handleDeleteCalendar"
+        @import="handleImportCalendar"
       />
 
       <CalendarView
@@ -236,6 +248,14 @@ async function handleCalendarSaved() {
     />
 
     <CalendarDialog :calendar-home-url="calendarHomeUrl" @saved="handleCalendarSaved" />
+
+    <ICSImportDialog
+      ref="importDialogRef"
+      :calendars="calendars"
+      :calendar-home-url="calendarHomeUrl"
+      :default-calendar="getDefaultCalendar() || null"
+      @imported="handleImported"
+    />
 
     <ConfirmDialog
       :is-open="confirmDelete?.isOpen || false"
