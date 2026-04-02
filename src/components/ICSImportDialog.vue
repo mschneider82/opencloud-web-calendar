@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useICSImport, type ImportMode } from '../composables/useICSImport'
 import type { Calendar } from '../types/calendar'
 import { t } from '../composables/useLanguage'
@@ -28,14 +28,22 @@ const {
 const selectedFile = ref<File | null>(null)
 const importMode = ref<ImportMode>('new-calendar')
 const newCalendarName = ref('')
+const selectedMergeCalendar = ref<Calendar | null>(null)
 const showDetails = ref(false)
 
 const fileInputRef = ref<HTMLInputElement | null>(null)
 
+// Pre-select default calendar when switching to merge mode
+watch(importMode, (mode) => {
+  if (mode === 'merge' && !selectedMergeCalendar.value && props.defaultCalendar) {
+    selectedMergeCalendar.value = props.defaultCalendar
+  }
+})
+
 const canImport = computed(() => {
   if (!selectedFile.value) return false
   if (importMode.value === 'new-calendar' && !newCalendarName.value.trim()) return false
-  if (importMode.value === 'merge' && !props.defaultCalendar) return false
+  if (importMode.value === 'merge' && !selectedMergeCalendar.value) return false
   return true
 })
 
@@ -62,7 +70,7 @@ async function handleImport() {
     selectedFile.value,
     importMode.value,
     newCalendarName.value,
-    importMode.value === 'merge' ? props.defaultCalendar : null,
+    importMode.value === 'merge' ? selectedMergeCalendar.value : null,
     props.calendarHomeUrl,
     props.calendars
   )
@@ -75,6 +83,7 @@ async function handleImport() {
 function handleClose() {
   selectedFile.value = null
   newCalendarName.value = ''
+  selectedMergeCalendar.value = null
   importMode.value = 'new-calendar'
   showDetails.value = false
   close()
@@ -163,16 +172,35 @@ defineExpose({ open })
                   v-model="importMode"
                   type="radio"
                   value="merge"
-                  :disabled="!defaultCalendar"
+                  :disabled="calendars.length === 0"
                   class="ext:w-4 ext:h-4"
                 />
                 <label for="mode-merge" class="ext:text-sm ext:text-gray-900">
-                  {{ t('Merge into current calendar') }}
-                  <span v-if="defaultCalendar" class="ext:text-gray-500">
-                    ({{ defaultCalendar.displayName }})
-                  </span>
+                  {{ t('Merge into existing calendar') }}
                 </label>
               </div>
+            </div>
+
+            <!-- Calendar selector (merge mode) -->
+            <div v-if="importMode === 'merge'">
+              <label for="merge-target" class="ext:block ext:text-sm ext:font-medium ext:text-gray-700 ext:mb-1">
+                {{ t('Target calendar') }}
+              </label>
+              <select
+                id="merge-target"
+                :value="selectedMergeCalendar?.href ?? ''"
+                class="ext:w-full ext:px-3 ext:py-2 ext:text-gray-900 ext:border ext:border-gray-300 ext:rounded ext:focus:ring-2 ext:focus:ring-blue-500 ext:focus:border-blue-500 ext:bg-white"
+                @change="selectedMergeCalendar = calendars.find(c => c.href === ($event.target as HTMLSelectElement).value) ?? null"
+              >
+                <option value="" disabled>{{ t('Select calendar') }}</option>
+                <option
+                  v-for="cal in calendars"
+                  :key="cal.href"
+                  :value="cal.href"
+                >
+                  {{ cal.displayName }}
+                </option>
+              </select>
             </div>
 
             <!-- Calendar name (new calendar mode) -->
