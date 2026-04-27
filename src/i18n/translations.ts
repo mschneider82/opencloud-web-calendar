@@ -81,6 +81,9 @@ export const translations = {
     occurrences: 'occurrences',
     On: 'On',
     'Delete this event': 'Delete this event',
+    'Export .ics': 'Export .ics',
+    'Download this occurrence as .ics': 'Download this occurrence as .ics',
+    'Download as .ics': 'Download as .ics',
 
     // ICS Import
     'Import Calendar': 'Import Calendar',
@@ -193,6 +196,9 @@ export const translations = {
     occurrences: 'Wiederholungen',
     On: 'Am',
     'Delete this event': 'Diesen Termin löschen',
+    'Export .ics': 'Als .ics herunterladen',
+    'Download this occurrence as .ics': 'Dieses Vorkommen als .ics herunterladen',
+    'Download as .ics': 'Als .ics herunterladen',
 
     // ICS Import
     'Import Calendar': 'Kalender importieren',

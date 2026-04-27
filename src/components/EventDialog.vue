@@ -4,6 +4,7 @@ import { useEventEditor } from '../composables/useEventEditor'
 import type { Calendar, RecurrenceFormData } from '../types/calendar'
 import { formatDateForInput, formatTimeForInput } from '../utils/date'
 import { t } from '../composables/useLanguage'
+import { generateICS } from '../caldav/ics-utils'
 
 const props = defineProps<{
   calendars: readonly Calendar[]
@@ -17,6 +18,7 @@ const emit = defineEmits<{
 const {
   isOpen,
   isEditing,
+  editingEvent,
   formData,
   saving,
   error,
@@ -191,6 +193,35 @@ async function handleDelete() {
 
 function handleClose() {
   close()
+}
+
+function handleExport() {
+  if (!editingEvent.value) return
+
+  let icsContent: string
+
+  if (editScope.value === 'single') {
+    // Export only this occurrence as a standalone event (no RRULE)
+    icsContent = generateICS({
+      ...formData.value,
+      uid: editingEvent.value.uid,
+      recurrence: undefined
+    })
+  } else {
+    // Export full event or series using raw server ICS data
+    icsContent = editingEvent.value.icsData
+  }
+
+  const safeName = (formData.value.summary || 'event').replace(/[^a-zA-Z0-9_\- ]/g, '_').trim()
+  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${safeName}.ics`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
 }
 </script>
 
@@ -538,7 +569,7 @@ function handleClose() {
 
         <!-- Footer -->
         <div class="ext:flex ext:items-center ext:justify-between ext:px-6 ext:py-4 ext:border-t ext:bg-gray-50 ext:shrink-0">
-          <div>
+          <div class="ext:flex ext:items-center ext:gap-2">
             <button
               v-if="isEditing"
               type="button"
@@ -547,6 +578,18 @@ function handleClose() {
               @click="handleDelete"
             >
               {{ editScope === 'single' ? t('Delete this event') : t('Delete') }}
+            </button>
+            <button
+              v-if="isEditing"
+              type="button"
+              class="ext:flex ext:items-center ext:gap-1.5 ext:px-3 ext:py-2 ext:text-sm ext:text-gray-600 ext:rounded ext:border ext:border-gray-300 hover:ext:bg-gray-100"
+              :title="editScope === 'single' ? t('Download this occurrence as .ics') : t('Download as .ics')"
+              @click="handleExport"
+            >
+              <svg class="ext:w-4 ext:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              <span>.ics</span>
             </button>
           </div>
           <div class="ext:flex ext:gap-3">
