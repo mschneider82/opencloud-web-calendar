@@ -340,7 +340,7 @@ function handleClose() {
           </div>
 
           <!-- Start -->
-          <div class="ext:grid ext:grid-cols-2 ext:gap-4">
+          <div :class="formData.allDay ? 'ext:grid ext:grid-cols-1' : 'ext:grid ext:grid-cols-2 ext:gap-4'">
             <div>
               <label for="event-start-date" class="ext:block ext:text-sm ext:font-medium ext:text-gray-700 ext:mb-1">
                 {{ t('Start Date') }}
@@ -368,7 +368,7 @@ function handleClose() {
           </div>
 
           <!-- End -->
-          <div class="ext:grid ext:grid-cols-2 ext:gap-4">
+          <div :class="formData.allDay ? 'ext:grid ext:grid-cols-1' : 'ext:grid ext:grid-cols-2 ext:gap-4'">
             <div>
               <label for="event-end-date" class="ext:block ext:text-sm ext:font-medium ext:text-gray-700 ext:mb-1">
                 {{ t('End Date') }}

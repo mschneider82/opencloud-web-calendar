@@ -105,7 +105,7 @@ function handleClose() {
             <label class="ext:block ext:text-sm ext:font-medium ext:text-gray-700 ext:mb-2">
               {{ t('Color') }}
             </label>
-            <div class="ext:grid ext:grid-cols-8 ext:gap-2">
+            <div class="ext:grid ext:grid-cols-4 sm:ext:grid-cols-8 ext:gap-2">
               <button
                 v-for="color in presetColors"
                 :key="color"

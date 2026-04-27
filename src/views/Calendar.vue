@@ -53,6 +53,12 @@ const { open: openCalendarEditor } = useCalendarEditor()
 const importDialogRef = ref<InstanceType<typeof ICSImportDialog> | null>(null)
 const { isDark } = useTheme()
 
+const sidebarOpen = ref(false)
+
+function toggleSidebar() {
+  sidebarOpen.value = !sidebarOpen.value
+}
+
 // Confirmation dialog state
 const confirmDelete = ref<{
   isOpen: boolean
@@ -216,12 +222,21 @@ async function handleImported() {
       @next="handleNext"
       @today="handleToday"
       @change-view="handleViewChange"
+      @toggle-sidebar="toggleSidebar"
     />
 
-    <div class="ext:flex ext:flex-1 ext:overflow-hidden">
+    <div class="ext:flex ext:flex-1 ext:overflow-hidden ext:relative">
+      <!-- Mobile sidebar backdrop -->
+      <div
+        v-if="sidebarOpen"
+        class="sm:ext:hidden ext:absolute ext:inset-0 ext:z-10 ext:bg-black/30"
+        @click="sidebarOpen = false"
+      />
+
       <CalendarSidebar
         :calendars="calendars"
         :loading="calendarsLoading"
+        :is-open="sidebarOpen"
         @toggle="handleToggleCalendar"
         @create="handleCreateCalendar"
         @delete="handleDeleteCalendar"
@@ -436,7 +451,8 @@ async function handleImported() {
 }
 
 /* --- Dialog shadows --- */
-[data-calendar-theme="dark"] .ext\:shadow-xl {
+[data-calendar-theme="dark"] .ext\:shadow-xl,
+[data-calendar-theme="dark"] .ext\:shadow-lg {
   --tw-shadow-color: rgba(0, 0, 0, 0.5) !important;
 }
 </style>
