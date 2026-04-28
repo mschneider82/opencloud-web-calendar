@@ -19,12 +19,8 @@ import { initAuthStore } from '../caldav/auth'
 import { initLanguage, t } from '../composables/useLanguage'
 import type { CalendarEvent } from '../types/calendar'
 
-console.log('[WebCalendar] Calendar.vue script executing')
-
 // Initialize auth store for CalDAV requests
 const authStore = useAuthStore()
-console.log('[WebCalendar] authStore obtained:', authStore)
-console.log('[WebCalendar] authStore.accessToken:', authStore.accessToken)
 initAuthStore(authStore)
 
 // Initialize language from user profile

@@ -43,7 +43,7 @@ Add the extension to your OpenCloud `config.json`:
 
 ### 3. Configure Content Security Policy (CSP)
 
-Add `https://esm.sh/` to your CSP configuration to allow loading of required dependencies:
+Allow `data:` in `font-src` so FullCalendar's bundled icon font can load:
 
 ```yaml
 # csp.yaml
@@ -51,7 +51,6 @@ directives:
   font-src:
     - "'self'"
     - "data:"
-    - "https://esm.sh/"
 ```
 
 ### 4. Configure CalDAV Backend Proxy
@@ -115,7 +114,6 @@ csp:
     font-src:
       - "'self'"
       - "data:"
-      - "https://esm.sh/"
 ```
 
 ### 3. Configure CalDAV Proxy Routes

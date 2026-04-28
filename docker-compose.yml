@@ -11,9 +11,10 @@ services:
       OC_LOG_LEVEL: error
       IDM_ADMIN_PASSWORD: admin
       IDM_CREATE_DEMO_USERS: true
-      PROXY_ENABLE_BASIC_AUTH: true
+      PROXY_ENABLE_BASIC_AUTH: false
       PROXY_TLS: 'false'
       WEB_ASSET_APPS_PATH: /web/apps
+      PROXY_CSP_CONFIG_FILE_LOCATION: /etc/opencloud/csp.yaml
     labels:
       traefik.enable: true
       traefik.http.routers.opencloud.tls: true
@@ -22,18 +23,19 @@ services:
       traefik.http.services.opencloud.loadbalancer.server.port: 9200
       traefik.http.routers.opencloud.middlewares: cors
     volumes:
-      - opencloud-config:/etc/opencloud
       - ./dev/docker/opencloud/apps.yaml:/etc/opencloud/apps.yaml
+      - ./dev/docker/opencloud/proxy.yaml:/etc/opencloud/proxy.yaml
+      - ./dev/docker/opencloud/csp.yaml:/etc/opencloud/csp.yaml
       - ./dist:/web/apps/skeleton
     depends_on:
       - traefik
 
   traefik:
-    image: traefik:v3.5.3
+    image: traefik:v3.6
     networks:
       opencloud-net:
         aliases:
-          - host.docker.internal:9200
+          - host.docker.internal
     restart: unless-stopped
     entrypoint:
       [
@@ -76,8 +78,20 @@ services:
       - './dev/docker/traefik/configs:/configs'
       - '/var/run/docker.sock:/var/run/docker.sock:ro'
 
+  radicale:
+    image: ${RADICALE_DOCKER_IMAGE:-opencloudeu/radicale}:${RADICALE_DOCKER_TAG:-latest}
+    networks:
+      opencloud-net: null
+    logging:
+      driver: ${LOG_DRIVER:-local}
+    restart: always
+    volumes:
+      - ./dev/docker/radicale/config:/etc/radicale/config
+      - ${RADICALE_DATA_DIR:-radicale-data}:/var/lib/radicale
+
 volumes:
   opencloud-config:
+  radicale-data:
 
 networks:
   opencloud-net:
