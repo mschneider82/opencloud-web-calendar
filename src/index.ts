@@ -12,8 +12,6 @@ import { initLanguage, t } from './composables/useLanguage'
 
 export default defineWebApplication({
   setup(args) {
-    console.log('[WebCalendar] App setup called')
-
     // Initialize language early
     initLanguage()
 
@@ -28,10 +26,7 @@ export default defineWebApplication({
       {
         path: '/',
         name: 'web-calendar',
-        component: () => {
-          console.log('[WebCalendar] Loading Calendar.vue')
-          return import('./views/Calendar.vue')
-        },
+        component: () => import('./views/Calendar.vue'),
         meta: {
           authContext: 'user',
           title: t('Web Calendar')
